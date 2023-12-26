@@ -3,6 +3,7 @@ package com.example.demo.user;
 import com.example.demo.user.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -20,6 +21,10 @@ public class UserService {
     public User findByEmail(String email) throws UserNotFoundException{
         Optional<User> founded = userRepository.findByEmail(email);
         return founded.orElseThrow(()->new UserNotFoundException("User with email:"+email+" not found"));
+    }
+
+    public boolean existsByLoginOrEmail(String login, String email){
+        return userRepository.findByLoginOrEmail(login, email).isPresent();
     }
     public User createUser(UserDTO userDTO){
         User newUser = new User();
