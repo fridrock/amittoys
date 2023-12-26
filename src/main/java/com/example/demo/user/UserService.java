@@ -1,9 +1,10 @@
 package com.example.demo.user;
 
+import com.example.demo.user.dto.AuthDTO;
+import com.example.demo.user.dto.CreateDTO;
 import com.example.demo.user.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class UserService {
     public boolean existsByLoginOrEmail(String login, String email){
         return userRepository.findByLoginOrEmail(login, email).isPresent();
     }
-    public User createUser(UserDTO userDTO){
+    public User createUser(CreateDTO userDTO){
         User newUser = new User();
         newUser.setLogin(userDTO.login());
         newUser.setEmail(userDTO.email());

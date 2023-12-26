@@ -13,7 +13,7 @@ public class UserDetailsAdapter implements UserDetails {
     private final User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(()->"read");
+        return List.of(()->"ADMIN");
     }
     @Override
     public String getPassword() {
