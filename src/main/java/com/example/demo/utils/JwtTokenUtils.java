@@ -12,7 +12,7 @@ import java.util.*;
 
 @Component
 public class JwtTokenUtils {
-    private Duration jwtLifetime = Duration.ofMinutes(30);
+    private Duration jwtLifetime = Duration.ofMinutes(1);
     private SecretKey secretKey;
     private JwtParser jwtParser;
     private String SECRET_KEY = "secretasdflksajdflkasjdflkjassadfasdjfaklsdjlfakdkjfalksdjfsjlklkfjaslfjsajjldsals";
@@ -46,13 +46,14 @@ public class JwtTokenUtils {
     public String getUserName(String token){
         return getAllClaimsFromToken(token).getSubject();
     }
-    public boolean isTokenValid(String token){
+    public JwtTokenStatus isTokenValid(String token){
         try{
-            var exp = getAllClaimsFromToken(token).getExpiration();
-            var now = new Date();
-            return now.before(exp);
+            getAllClaimsFromToken(token);
+            return JwtTokenStatus.OK;
+        }catch (ExpiredJwtException e){
+            return JwtTokenStatus.EXPIRED;
         }catch (JwtException e){
-            return false;
+            return JwtTokenStatus.WRONG;
         }
     }
 }

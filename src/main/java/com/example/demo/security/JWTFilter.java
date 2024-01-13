@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.example.demo.utils.JwtTokenStatus;
 import com.example.demo.utils.JwtTokenUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
@@ -20,7 +21,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
     private final String HEADER_NAME = "Authorization";
-    private final UserDetailsService uds;
     private final int BEARER_PREFIX = "Bearer".length()+1;
     private final JwtTokenUtils jwtTokenUtils;
     @Override
@@ -31,15 +31,18 @@ public class JWTFilter extends OncePerRequestFilter {
         if(StringUtils.isEmpty(jwtToken)){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             filterChain.doFilter(request, response);
-        }else if(!jwtTokenUtils.isTokenValid(jwtToken)){
+        }else if(jwtTokenUtils.isTokenValid(jwtToken) == JwtTokenStatus.WRONG){
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             filterChain.doFilter(request, response);
-        }else{
+        }else if(jwtTokenUtils.isTokenValid(jwtToken) == JwtTokenStatus.EXPIRED){
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            filterChain.doFilter(request, response);
+        } else{
             var username = jwtTokenUtils.getUserName(jwtToken);
             //TODO make custom authentication to remove query to database
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
-                            uds.loadUserByUsername(username),
+                            username,
                             null,
                             Collections.emptyList()
                             );
