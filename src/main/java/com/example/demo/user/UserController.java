@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +25,6 @@ public class UserController {
     private final JwtTokenUtils jwtTokenUtils;
     @PostMapping("/reg")
     public ResponseEntity<String> createUser(@RequestBody CreateDTO userDTO){
-        System.out.println("regau");
         if(userService.existsByLoginOrEmail(userDTO.login(), userDTO.email())){
             return new ResponseEntity<>("Such user already exist",HttpStatus.FOUND);
         }else{
