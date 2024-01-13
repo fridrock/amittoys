@@ -26,6 +26,7 @@ public class UserController {
     private final JwtTokenUtils jwtTokenUtils;
     @PostMapping("/reg")
     public ResponseEntity<String> createUser(@RequestBody CreateDTO userDTO){
+        System.out.println("regau");
         if(userService.existsByLoginOrEmail(userDTO.login(), userDTO.email())){
             return new ResponseEntity<>("Such user already exist",HttpStatus.FOUND);
         }else{

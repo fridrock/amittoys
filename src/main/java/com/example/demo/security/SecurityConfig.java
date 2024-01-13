@@ -1,5 +1,7 @@
 package com.example.demo.security;
 
+import com.example.demo.utils.JwtTokenUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -14,12 +16,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
 @EnableWebSecurity
 @PropertySource("classpath:application.yml")
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JWTFilter jwtFilter;
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
@@ -33,18 +38,13 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((request)->request
+                        .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/product/**").authenticated()
-                        .requestMatchers("/users/**").permitAll())
-                .httpBasic(Customizer.withDefaults())
+                        .anyRequest().permitAll())
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> {
                     httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
-                //if we didn't authenticate send 401 code
-                .exceptionHandling(r->{
-                    r.authenticationEntryPoint(
-                           new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
-                    );
-                })
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
