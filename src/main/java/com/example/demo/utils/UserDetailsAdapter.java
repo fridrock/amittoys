@@ -8,9 +8,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@AllArgsConstructor
+
 public class UserDetailsAdapter implements UserDetails {
     private final User user;
+    private final Long id;
+    public UserDetailsAdapter(User user){
+        this.id = user.getId();
+        this.user = user;
+    }
+    public Long getId(){
+        return this.id;
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(()->"ADMIN");

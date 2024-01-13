@@ -8,9 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +30,15 @@ public class UserController {
             return new ResponseEntity<>("Such user already exist",HttpStatus.FOUND);
         }else{
             userService.createUser(userDTO);
-            return new ResponseEntity<>("Successfully created new user", HttpStatus.OK);
+            var username = userDTO.login()==null?userDTO.email():userDTO.login();
+            //generating token
+            var ud = userDetailsService.loadUserByUsername(username);
+            String token = jwtTokenUtils.generateToken(ud);
+            //authenticate user
+            UsernamePasswordAuthenticationToken authReq
+                    = new UsernamePasswordAuthenticationToken(username, userDTO.password());
+            authenticationManager.authenticate(authReq);
+            return ResponseEntity.ok(token);
         }
     }
     @PostMapping("/auth")

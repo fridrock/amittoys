@@ -4,39 +4,38 @@ package com.example.demo.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.PublicKey;
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
+@PropertySource("application.yml")
 public class JwtTokenUtils {
-    //TODO replace with @Value
-    private final String secret = "secretasdflksajdflkasjdflkjassadfasdjfaklsdjlfakdkjfalksdjfsjlklkfjaslfjsajjldsals";
+    public static void main(String[] args) {
+        var test = new JwtTokenUtils();
+        System.out.println(test.generateToken());
+    }
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
+    //TODO make it with value
     private Duration jwtLifetime = Duration.ofMinutes(30);
     private SecretKey secretKey;
-    public JwtTokenUtils(){
-        // decode the base64 encoded string
-        //byte[] decodedKey = Base64.getDecoder().decode(secret);
-        // rebuild key using SecretKeySpec
-        //this.secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    private void createSecretKey(){
+        var signatureAlgorithm = SignatureAlgorithm.HS256;
+        byte[] secretKeyBytes = Base64.getDecoder().decode(SECRET_KEY);
+        this.secretKey = new SecretKeySpec(secretKeyBytes, signatureAlgorithm.getJcaName());
     }
     public String generateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
-        //for future roles
-        List<String> rolesList = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        claims.put("roles", rolesList);
+        claims.put("id", ((UserDetailsAdapter)userDetails).getId());
+        //TODO add roles
         Date issuedDate = new Date();
         Date expiredTime = new Date(issuedDate.getTime()+jwtLifetime.toMillis());
         return Jwts.builder()
@@ -44,17 +43,17 @@ public class JwtTokenUtils {
                 .subject(userDetails.getUsername())
                 .issuedAt(issuedDate)
                 .expiration(expiredTime)
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(secretKey)
                 .compact();
-    }
-    public String getUserName(String token){
-        return getAllClaimsFromToken(token).getSubject();
-    }
-    public List<String> getRoles(String token){
-        return getAllClaimsFromToken(token).get("roles", List.class);
     }
     private Claims getAllClaimsFromToken(String token){
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+    }
+    private String getClaim(String token, String claim){
+        return getAllClaimsFromToken(token).get(claim).toString();
+    }
+    public String getUserName(String token){
+        return getAllClaimsFromToken(token).getSubject();
     }
 }
 
