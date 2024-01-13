@@ -12,6 +12,3 @@ spring:
   sql:
     init:
       platform: postgres
-jwt:
-  secret: secretasdflksajdflkasjdflkjassadfasdjfaklsdjlfakdkjfalksdjfsjlklkfjaslfjsajjldsals
-  lifetime: 30m
