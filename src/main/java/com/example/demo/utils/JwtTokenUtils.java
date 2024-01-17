@@ -1,7 +1,9 @@
 package com.example.demo.utils;
 
 
+import com.example.demo.roles.Role;
 import io.jsonwebtoken.*;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenUtils {
@@ -26,7 +29,8 @@ public class JwtTokenUtils {
     public String generateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", ((UserDetailsAdapter)userDetails).getId());
-        //TODO add roles
+        List<GrantedAuthority> roles = userDetails.getAuthorities().stream().collect(Collectors.toList());
+        claims.put("roles", roles);
         Date issuedDate = new Date();
         Date expiredTime = new Date(issuedDate.getTime()+jwtLifetime.toMillis());
         return Jwts.builder()
@@ -40,8 +44,8 @@ public class JwtTokenUtils {
     private Claims getAllClaimsFromToken(String token){
         return jwtParser.parseSignedClaims(token).getPayload();
     }
-    private String getClaim(String token, String claim){
-        return getAllClaimsFromToken(token).get(claim).toString();
+    public List<GrantedAuthority> getRoles(String token){
+        return (List<GrantedAuthority>)this.getAllClaimsFromToken(token).get("roles");
     }
     public String getUserName(String token){
         return getAllClaimsFromToken(token).getSubject();

@@ -32,19 +32,20 @@ public class JWTFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             filterChain.doFilter(request, response);
         }else if(jwtTokenUtils.isTokenValid(jwtToken) == JwtTokenStatus.WRONG){
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Token is wrong");
             filterChain.doFilter(request, response);
         }else if(jwtTokenUtils.isTokenValid(jwtToken) == JwtTokenStatus.EXPIRED){
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Token is expired");
             filterChain.doFilter(request, response);
         } else{
             var username = jwtTokenUtils.getUserName(jwtToken);
+            var roles = jwtTokenUtils.getRoles(jwtToken);
             //TODO make custom authentication to remove query to database
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                             username,
                             null,
-                            Collections.emptyList()
+                            roles
                             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
             filterChain.doFilter(request, response);

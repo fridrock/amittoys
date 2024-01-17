@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class UserDetailsAdapter implements UserDetails {
@@ -21,7 +22,9 @@ public class UserDetailsAdapter implements UserDetails {
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(()->"ADMIN");
+        return user.getRoles().stream()
+                .map(role->new RolesGrantedAuthorityAdapter(role))
+                .collect(Collectors.toList());
     }
     @Override
     public String getPassword() {
