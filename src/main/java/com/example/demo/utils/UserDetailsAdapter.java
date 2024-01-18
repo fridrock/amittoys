@@ -23,7 +23,7 @@ public class UserDetailsAdapter implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles().stream()
-                .map(role->new RolesGrantedAuthorityAdapter(role))
+                .map(role->new RolesGrantedAuthorityAdapter(role.getRole()))
                 .collect(Collectors.toList());
     }
     @Override

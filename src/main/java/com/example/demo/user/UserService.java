@@ -38,6 +38,7 @@ public class UserService {
         newUser.setLogin(userDTO.login());
         newUser.setEmail(userDTO.email());
         newUser.setPasswordHash(encoder.encode(userDTO.password()));
+        //TODO remove this role choose
         String userRoleName = newUser.getLogin().startsWith("a")?"ADMIN":"USER";
         Role role;
         try{

@@ -1,7 +1,6 @@
 package com.example.demo.utils;
 
 
-import com.example.demo.roles.Role;
 import io.jsonwebtoken.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +17,7 @@ public class JwtTokenUtils {
     private Duration jwtLifetime = Duration.ofMinutes(1);
     private SecretKey secretKey;
     private JwtParser jwtParser;
-    private String SECRET_KEY = "secretasdflksajdflkasjdflkjassadfasdjfaklsdjlfakdkjfalksdjfsjlklkfjaslfjsajjldsals";
+    private final String SECRET_KEY = "secretasdflksajdflkasjdflkjassadfasdjfaklsdjlfakdkjfalksdjfsjlklkfjaslfjsajjldsals";
     public JwtTokenUtils(){
         var signatureAlgorithm = SignatureAlgorithm.HS256;
         byte[] secretKeyBytes = Base64.getDecoder().decode(SECRET_KEY);
@@ -29,7 +28,8 @@ public class JwtTokenUtils {
     public String generateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", ((UserDetailsAdapter)userDetails).getId());
-        List<GrantedAuthority> roles = userDetails.getAuthorities().stream().collect(Collectors.toList());
+        //cast GrantedAuthority list to list of strings that describe roles
+        List<String> roles = userDetails.getAuthorities().stream().map(authority->authority.getAuthority()).collect(Collectors.toList());
         claims.put("roles", roles);
         Date issuedDate = new Date();
         Date expiredTime = new Date(issuedDate.getTime()+jwtLifetime.toMillis());
@@ -45,7 +45,9 @@ public class JwtTokenUtils {
         return jwtParser.parseSignedClaims(token).getPayload();
     }
     public List<GrantedAuthority> getRoles(String token){
-        return (List<GrantedAuthority>)this.getAllClaimsFromToken(token).get("roles");
+        //get roles as String values and then cast them into list of grantedAuthority
+        var rolesStrings = ((List<String>)this.getAllClaimsFromToken(token).get("roles"));
+        return rolesStrings.stream().map(s->new RolesGrantedAuthorityAdapter(s)).collect(Collectors.toList());
     }
     public String getUserName(String token){
         return getAllClaimsFromToken(token).getSubject();

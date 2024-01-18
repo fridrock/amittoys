@@ -4,13 +4,13 @@ import com.example.demo.roles.Role;
 import org.springframework.security.core.GrantedAuthority;
 
 public class RolesGrantedAuthorityAdapter implements GrantedAuthority {
-    private Role role;
-    public RolesGrantedAuthorityAdapter(Role role){
-        this.role = role;
+    private String authority;
+    public RolesGrantedAuthorityAdapter(String authority){
+        this.authority = authority;
     }
 
     @Override
     public String getAuthority() {
-        return this.role.getRole();
+        return this.authority;
     }
 }

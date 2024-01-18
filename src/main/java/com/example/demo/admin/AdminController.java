@@ -1,14 +1,15 @@
-package com.example.demo.product;
+package com.example.demo.admin;
+
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/product")
-public class ProductController {
-    @GetMapping("/hello")
+@RequestMapping("/admin")
+public class AdminController {
+    @GetMapping("/")
     public String hello(){
-        return "Hello, user";
+        return "Hello admin";
     }
 }

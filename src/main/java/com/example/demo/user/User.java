@@ -20,6 +20,11 @@ public class User {
     private String login;
     @Column(name = "password_hash")
     private String passwordHash;
-    @OneToMany
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = { @JoinColumn(name = "user_id") },
+            inverseJoinColumns = { @JoinColumn(name = "role_id") }
+    )
     List<Role> roles;
 }
